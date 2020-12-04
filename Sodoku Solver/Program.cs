@@ -12,15 +12,15 @@ namespace Sodoku_Solver
         static void Main(string[] args)
         {
             int[,] start = {
-                {0,0,7,2,8,0,0,0,1},
-                {0,2,0,0,4,0,5,0,0},
-                {5,0,8,0,0,0,0,0,0},
-                {0,0,0,1,7,2,0,0,8},
-                {2,0,0,0,0,0,0,0,4},
-                {6,0,0,4,5,8,0,0,0},
-                {0,0,0,0,0,0,3,0,5},
-                {0,0,4,0,1,0,0,6,0},
-                {8,0,0,0,2,9,1,0,0},
+                {8,5,0,0,0,1,0,0,6},
+                {0,0,7,0,6,4,1,0,0},
+                {0,0,4,0,7,0,5,9,0},
+                {2,0,0,0,5,6,0,0,4},
+                {6,0,0,1,0,9,0,7,0},
+                {7,0,1,0,4,0,0,0,9},
+                {0,1,0,9,0,0,4,6,0},
+                {0,9,6,0,0,8,0,0,7},
+                {0,7,0,6,0,0,0,0,1},
             };
 
             puzzle = new Sodoku(start);
@@ -30,11 +30,44 @@ namespace Sodoku_Solver
             while (!IsDone())
             {
                 LowHangingFruit();
-
                 Possibilities();
+            }
 
-                //
-                Print(puzzle);
+            Print(puzzle, true);
+        }
+
+        public static void LowHangingFruit()
+        {
+            bool hasChanged = true;
+
+            while (hasChanged)
+            {
+                hasChanged = false;
+                for (int i = 0; i < 9; i++)
+                {
+                    for (int j = 0; j < 9; j++)
+                    {
+                        if (puzzle.Get(i, j) == 0)
+                        {
+                            List<int> missingNUmbers = puzzle.GetNumbersMissingFromEveryDemension(i, j);
+
+                            if (missingNUmbers.Count == 1)
+                            {
+                                puzzle.Put(i, j, missingNUmbers[0]);
+                                possibilities[i, j] = null;
+                                hasChanged = true;
+                            }
+                            else
+                            {
+                                possibilities[i, j] = missingNUmbers;
+                            }
+                        }
+                        else
+                        {
+                            possibilities[i, j] = null;
+                        }
+                    }
+                }
             }
         }
 
@@ -53,8 +86,8 @@ namespace Sodoku_Solver
                                 || OnlyPossibleOnce(GetPossibilitiesBlock(puzzle.GetBlockNumber(i, j)), possibility))
                             {
                                 puzzle.Put(i, j, possibility);
-                                Print(puzzle);
                                 possibilities[i, j] = null;
+                                return;
                             }
                         }
                     }
@@ -227,42 +260,6 @@ namespace Sodoku_Solver
             }
 
             return block;
-        }
-
-        public static void LowHangingFruit()
-        {
-            bool hasChanged = true;
-
-            while (hasChanged)
-            {
-                hasChanged = false;
-                for (int i = 0; i < 9; i++)
-                {
-                    for (int j = 0; j < 9; j++)
-                    {
-                        if (puzzle.Get(i, j) == 0)
-                        {
-                            List<int> missingNUmbers = puzzle.GetNumbersMissingFromEveryDemension(i, j);
-
-                            if (missingNUmbers.Count == 1)
-                            {
-                                puzzle.Put(i, j, missingNUmbers[0]);
-                                Print(puzzle);
-                                possibilities[i, j] = null;
-                                hasChanged = true;
-                            }
-                            else
-                            {
-                                possibilities[i, j] = missingNUmbers;
-                            }
-                        }
-                        else
-                        {
-                            possibilities[i, j] = null;
-                        }
-                    }
-                }
-            }
         }
 
         public static void Print(Sodoku puzzle, bool done = false)
